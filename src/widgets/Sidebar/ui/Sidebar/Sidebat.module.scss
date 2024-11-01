@@ -1,0 +1,12 @@
+.Sidebar {
+  height: calc(100vh - 50px);
+  width: 300px;
+  background-color: #8f9094;
+
+  position: relative;
+  transition: width 0.3s ease;
+}
+
+.collapsed {
+  width: 80px;
+}
