@@ -1,1 +1,1 @@
-export { AboutPage } from './AboutPage.tsx'
+export { AboutPageAsync as AboutPage } from './ui/AboutPageAsync.tsx'

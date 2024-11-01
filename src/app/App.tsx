@@ -1,8 +1,7 @@
 import { FC, useState } from 'react'
-import { Routes, Route, Link } from 'react-router-dom'
-import { AboutPage } from './pages/AboutPage'
-import { MainPage } from './pages/MainPage'
+import { Link } from 'react-router-dom'
 import './styles/index.scss'
+import { AppRouter } from '@/app/providers/router'
 
 export enum Theme {
   LIGHT = 'light',
@@ -21,10 +20,7 @@ export const App: FC = () => {
       <button onClick={toogleTheme}>Изменить тему</button>
       <Link to='/about'>О сайте</Link>
       <Link to='/'>Главная</Link>
-      <Routes>
-        <Route path='/about' element={<AboutPage />} />
-        <Route path='/' element={<MainPage />} />
-      </Routes>
+      <AppRouter />
     </div>
   )
 }
