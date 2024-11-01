@@ -1,7 +1,8 @@
 import { useState } from 'react'
-import { Button } from '@/shared/ui/Button/Button.tsx'
 import styles from './Sidebat.module.scss'
 import classNames from 'classnames'
+import { Button } from '@ui/Button/Button.tsx'
+import { LangSwitcher } from '@widgets/LangSwitcher'
 
 export const Sidebar = () => {
   const [collapsed, setCollapsed] = useState(false)
@@ -16,6 +17,7 @@ export const Sidebar = () => {
       })}
     >
       <Button onClick={onToggle}>toggle</Button>
+      <LangSwitcher />
     </div>
   )
 }

@@ -1,8 +1,8 @@
 import { Box } from '@mui/material'
 import styles from './header.module.scss'
-import { AppLink } from '@/shared/ui/AppLink/AppLink.tsx'
-import { RoutePath } from '@/shared/config/routeConfig/routeConfig.tsx'
-import { Button } from '@/shared/ui/Button/Button.tsx'
+import { Button } from '@ui/Button/Button.tsx'
+import { AppLink } from '@ui/AppLink/AppLink.tsx'
+import { RoutePath } from '@shared/config/routeConfig/routeConfig.tsx'
 
 export const Header = () => {
   return (

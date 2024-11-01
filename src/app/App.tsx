@@ -1,17 +1,19 @@
-import { FC } from 'react'
+import { FC, Suspense } from 'react'
 import './styles/index.scss'
-import { AppRouter } from '@/app/providers/router'
-import { Header } from '@/widgets/Header'
-import { Sidebar } from '@/widgets/Sidebar'
+import { Header } from '@widgets/Header'
+import { Sidebar } from '@widgets/Sidebar'
+import { AppRouter } from '@app/providers/router'
 
 export const App: FC = () => {
   return (
     <div className='app'>
-      <Header />
-      <div className='content-page'>
-        <Sidebar />
-        <AppRouter />
-      </div>
+      <Suspense fallback=''>
+        <Header />
+        <div className='content-page'>
+          <Sidebar />
+          <AppRouter />
+        </div>
+      </Suspense>
     </div>
   )
 }

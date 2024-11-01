@@ -22,7 +22,16 @@
 
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@src/*": ["./src/*"],
+      "@app/*": ["./src/app/*"],
+      "@pages/*": ["./src/pages/*"],
+      "@widgets/*": ["./src/widgets/*"],
+      "@features/*": ["./src/features/*"],
+      "@entities/*": ["./src/entities/*"],
+      "@shared/*": ["./src/shared/*"],
+      "@ui/*": ["./src/shared/ui/*"],
+      "@lib/*": ["./src/shared/lib/*"],
+      "@api/*": ["./src/shared/api/*"]
     }
   },
   "include": [
