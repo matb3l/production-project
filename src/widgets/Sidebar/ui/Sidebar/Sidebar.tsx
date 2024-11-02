@@ -16,6 +16,7 @@ export const Sidebar = () => {
         [styles.collapsed]: collapsed,
       })}
     >
+      {/* eslint-disable-next-line i18next/no-literal-string */}
       <Button onClick={onToggle}>toggle</Button>
       <LangSwitcher />
     </div>

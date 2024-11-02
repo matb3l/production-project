@@ -1,16 +1,16 @@
 import { Box } from '@mui/material'
 import styles from './header.module.scss'
-import { Button } from '@ui/Button/Button.tsx'
 import { AppLink } from '@ui/AppLink/AppLink.tsx'
 import { RoutePath } from '@shared/config/routeConfig/routeConfig.tsx'
+import { useTranslation } from 'react-i18next'
 
 export const Header = () => {
+  const { t } = useTranslation()
   return (
     <Box className={styles.wrapper}>
-      <Button>check</Button>
       <Box className={styles.linkBlock}>
-        <AppLink to={RoutePath.main}>На главную</AppLink>
-        <AppLink to={RoutePath.about}>О Сайте</AppLink>
+        <AppLink to={RoutePath.main}>{t('На главную')}</AppLink>
+        <AppLink to={RoutePath.about}>{t('О сайте')}</AppLink>
       </Box>
     </Box>
   )
