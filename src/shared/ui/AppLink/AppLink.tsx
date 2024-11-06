@@ -12,7 +12,7 @@ export type AppLinkProps = {
 
 export function AppLink({ children, ...rest }: AppLinkProps) {
   return (
-    <MuiLink component={RouterLink} {...rest}>
+    <MuiLink component={RouterLink} sx={{ textDecoration: 'none' }} {...rest}>
       {children}
     </MuiLink>
   )

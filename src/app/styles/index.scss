@@ -1,7 +1,25 @@
-@import "variables/global";
-@import "reset";
-@import "themes/dark";
-@import "themes/light";
+@import '@fontsource/roboto/300.css';
+@import '@fontsource/roboto/400.css';
+@import '@fontsource/roboto/500.css';
+@import '@fontsource/roboto/700.css';
+
+body {
+  font-family: Roboto, sans-serif;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+input,
+button,
+textarea,
+select {
+  margin: 0;
+  font: inherit;
+}
 
 .app {
   font-size: var(--font-m);

@@ -6,10 +6,10 @@ import { AppRouter } from '@app/providers/router'
 
 export const App: FC = () => {
   return (
-    <div className='app'>
-      <Suspense fallback=''>
+    <div className="app">
+      <Suspense fallback="">
         <Header />
-        <div className='content-page'>
+        <div className="content-page">
           <Sidebar />
           <AppRouter />
         </div>
