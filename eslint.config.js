@@ -26,6 +26,13 @@ export default [
       ...airbnbBase.rules,
       ...airbnbTypescript.rules,
       'react/react-in-jsx-scope': 'off',
+      '@typescript-eslint/ban-ts-comment': [
+        'warn',
+        {
+          'ts-ignore': 'allow-with-description',
+          minimumDescriptionLength: 3,
+        },
+      ],
     },
   },
   pluginJs.configs.recommended,
