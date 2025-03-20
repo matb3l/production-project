@@ -1,10 +1,9 @@
-import { lazy } from 'react'
+import { lazy, Suspense } from 'react'
 
-export const AboutPageAsync = lazy(
-  () =>
-    new Promise(resolve => {
-      // todo исскуственная задержка потом исправить
-      // @ts-expect-error
-      setTimeout(() => resolve(import('./AboutPage.tsx')), 5000)
-    }),
+const AboutPage = lazy(() => import('./AboutPage.tsx'))
+
+export const AboutPageAsync = () => (
+  <Suspense fallback={<div>Loading...</div>}>
+    <AboutPage />
+  </Suspense>
 )
