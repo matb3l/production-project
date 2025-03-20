@@ -9,3 +9,15 @@
 .collapsed {
   width: 80px;
 }
+
+.collapseBtn {
+  position: absolute !important;
+  bottom: 40px;
+  right: -64px;
+  background: blue !important;
+
+  span {
+    width: 40px;
+    height: 40px;
+  }
+}
