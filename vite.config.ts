@@ -1,10 +1,11 @@
 import { defineConfig } from 'vite'
 import path from 'path'
 import react from '@vitejs/plugin-react-swc'
+import svgr from 'vite-plugin-svgr'
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), svgr()],
   css: {
     preprocessorOptions: {
       scss: {
@@ -22,6 +23,7 @@ export default defineConfig({
       '@entities': path.resolve(__dirname, './src/entities'),
       '@shared': path.resolve(__dirname, './src/shared'),
       '@ui': path.resolve(__dirname, './src/shared/ui'),
+      '@public': path.resolve(__dirname, './public'),
     },
   },
 })

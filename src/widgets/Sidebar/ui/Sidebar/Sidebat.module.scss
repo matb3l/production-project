@@ -4,6 +4,31 @@
   background-color: #8f9094;
   position: relative;
   transition: width 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 20px 0;
+}
+
+.LinksWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  align-items: center;
+  max-width: 150px;
+  align-self: center;
+}
+
+.Icon {
+  width: 24px;
+  height: 24px;
+}
+
+.Link {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  width: 100%;
 }
 
 .collapsed {
@@ -12,7 +37,7 @@
 
 .collapseBtn {
   position: absolute !important;
-  bottom: 40px;
+  bottom: 20px;
   right: -64px;
   background: blue !important;
 
@@ -20,4 +45,8 @@
     width: 40px;
     height: 40px;
   }
+}
+
+.collapseWrapper {
+  align-self: center;
 }
