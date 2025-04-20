@@ -1,15 +1,15 @@
-name: "linting, testing, building"
+name: 'linting, testing, building'
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 jobs:
   pipeline:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [ 22.x ]
+        node-version: [22.x]
 
     steps:
       - uses: actions/checkout@v2
@@ -18,12 +18,12 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       - name: install modules
-        run: yarn install
+        run: pnpm install
       - name: build project
-        run: yarn build
+        run: pnpm build
       - name: linting typescript
-        run: yarn lint:ts
+        run: pnpm lint:ts
       - name: linting css
-        run: yarn lint:scss
+        run: pnpm lint:scss
       - name: testing
-        run: yarn test
+        run: pnpm test
