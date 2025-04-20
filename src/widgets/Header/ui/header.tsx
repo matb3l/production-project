@@ -25,7 +25,7 @@ export const Header = () => {
         </Button>
       </Box>
       <Modal isOpen={isOpenModal} onClose={closeModal}>
-        {t('123')}
+        {t('12333')}
       </Modal>
     </Box>
   )
