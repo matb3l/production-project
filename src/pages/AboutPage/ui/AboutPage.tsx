@@ -6,6 +6,4 @@ const AboutPage: FC = () => {
   return <div>{t('Заголовок')}</div>
 }
 
-console.log(222)
-
 export default AboutPage

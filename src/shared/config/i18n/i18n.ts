@@ -9,7 +9,7 @@ i18n
     fallbackLng: 'ru', // язык по умолчанию
     lng: 'ru', // начальный язык
     preload: ['ru'], // загружается только текущий язык
-    debug: true,
+    debug: false,
     backend: {
       loadPath: '/locales/{{lng}}/{{ns}}.json', // путь к переводам
     },
