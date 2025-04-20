@@ -1,22 +1,100 @@
-# React + TypeScript + Vite
+# React Приложение с Интернационализацией
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Проект на React с использованием TypeScript, Vite и поддержкой многоязычности (i18n).
 
-Currently, two official plugins are available:
+## Описание
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Это современное веб-приложение, разработанное с использованием React и TypeScript. Проект имеет модульную архитектуру с разделением на widgets, pages, shared и app слои. Реализована поддержка многоязычности с помощью i18next.
 
-## Expanding the ESLint configuration
+## Технологии
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+- **React** - библиотека для создания пользовательских интерфейсов
+- **TypeScript** - типизированный JavaScript
+- **Vite** - быстрый инструмент сборки
+- **i18next** - решение для интернационализации
+- **SCSS Modules** - для стилизации компонентов
+- **React Router** - для навигации
 
-- Configure the top-level `parserOptions` property like this:
+## Структура проекта
 
+```
+src/
+├── app/            # Глобальные настройки приложения
+│   ├── providers/  # Провайдеры (роутер, ErrorBoundary)
+│   └── styles/     # Глобальные стили
+├── pages/          # Страницы приложения
+│   ├── AboutPage/
+│   ├── MainPage/
+│   └── NotFoundPage/
+├── shared/         # Переиспользуемые модули
+│   ├── config/     # Конфигурации (i18n, роутинг)
+│   └── ui/         # UI компоненты
+├── widgets/        # Композиционные компоненты
+│   ├── Header/
+│   ├── LangSwitcher/
+│   ├── PageError/
+│   ├── PageLoader/
+│   └── Sidebar/
+└── main.tsx        # Точка входа
+```
 
+## Локализация
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
+Проект поддерживает русский и английский языки. Файлы переводов находятся в директории `public/locales/`.
 
+### Настройка i18n
 
+Конфигурация i18n находится в файле `src/shared/config/i18n/i18n.ts`.
+
+## Установка и запуск
+
+### Требования
+
+- Node.js (версия 16 или выше)
+- pnpm (рекомендуется) или npm
+
+### Установка зависимостей
+
+```bash
+pnpm install
+```
+
+### Запуск в режиме разработки
+
+```bash
+pnpm dev
+```
+
+### Сборка для продакшена
+
+```bash
+pnpm build
+```
+
+### Предпросмотр сборки
+
+```bash
+pnpm preview
+```
+
+## Деплой
+
+Проект настроен для деплоя на Vercel. Конфигурация находится в файле `vercel.json`.
+
+## Тестирование
+
+Для запуска тестов используйте:
+
+```bash
+pnpm test
+```
+
+## Линтинг и форматирование
+
+В проекте настроены ESLint и Prettier для поддержания качества кода:
+
+```bash
+pnpm lint        # проверка кода
+pnpm lint:fix    # исправление ошибок линтера
+pnpm format      # форматирование кода
+```
