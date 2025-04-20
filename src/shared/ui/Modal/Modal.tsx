@@ -1,8 +1,8 @@
-interface ModalProps {
-  isOpen: boolean
-  onClose: () => void
-}
+// interface ModalProps {
+//   isOpen: boolean
+//   onClose: () => void
+// }
 
-export const Modal = () => {
-  return <Modal></Modal>
-}
+// export const Modal = () => {
+//   return <Modal></Modal>
+// }
