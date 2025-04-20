@@ -12,7 +12,7 @@ export const PageError = () => {
 
   return (
     <div className={styles.Wrapper}>
-      <Typography>{t('Произошла непредвиденнная ошибка')}</Typography>
+      <Typography>{t('Произошла непредвиденная ошибка')}</Typography>
       <Button onClick={reloadPage}>{t('Обновить страницу')}</Button>
     </div>
   )
