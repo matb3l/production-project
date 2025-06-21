@@ -1,3 +1,6 @@
+// For more info, see https://github.com/storybookjs/eslint-plugin-storybook#configuration-flat-config-format
+import storybook from 'eslint-plugin-storybook'
+
 import globals from 'globals'
 import pluginJs from '@eslint/js'
 import tseslint from 'typescript-eslint'
@@ -8,7 +11,8 @@ import i18next from 'eslint-plugin-i18next'
 
 /** @type {import('eslint').Linter.Config[]} */
 export default [
-  pluginReact.configs.flat.recommended, // Переносим это выше
+  // Переносим это выше
+  pluginReact.configs.flat.recommended,
   {
     files: ['**/*.{js,mjs,cjs,ts,jsx,tsx}'],
     languageOptions: {
@@ -38,4 +42,11 @@ export default [
   pluginJs.configs.recommended,
   ...tseslint.configs.recommended,
   i18next.configs['flat/recommended'],
+  ...storybook.configs['flat/recommended'],
+  {
+    files: ['**/*.stories.{ts,tsx}', '**/*.story.{ts,tsx}', '.storybook/**/*'],
+    rules: {
+      'i18next/no-literal-string': 'off',
+    },
+  },
 ]
