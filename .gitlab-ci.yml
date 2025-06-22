@@ -1,5 +1,5 @@
-# Базовый образ для всех заданий
-image: node:20-alpine
+# Используем образ с предустановленным pnpm
+image: pnpm/pnpm:8
 
 # Определение стадий конвейера
 stages:
@@ -15,9 +15,8 @@ cache:
     - .pnpm-store
     - node_modules/
 
-# Перед каждым заданием устанавливаем pnpm
+# Настраиваем pnpm
 before_script:
-  - npm install -g pnpm
   - pnpm config set store-dir .pnpm-store
 
 # Установка зависимостей
