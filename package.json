@@ -14,7 +14,8 @@
     "lint:ts:fix": "eslint \"**/*.{ts,tsx}\" --fix",
     "test": "vitest",
     "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "build-storybook": "storybook build",
+    "prepare": "husky"
   },
   "dependencies": {
     "@emotion/react": "^11.13.3",

@@ -1,6 +1,6 @@
 import { LoginForm } from '../LoginForm/LoginForm'
 import { FC } from 'react'
-import { Modal } from '@mui/material'
+import { Modal } from '@shared/ui'
 
 interface LoginModalProps {
   isOpen: boolean
@@ -9,7 +9,7 @@ interface LoginModalProps {
 
 export const LoginModal: FC<LoginModalProps> = ({ isOpen, onClose }) => {
   return (
-    <Modal onClose={onClose} open={isOpen}>
+    <Modal isOpen={isOpen} onClose={onClose} showCloseButton>
       <LoginForm />
     </Modal>
   )
