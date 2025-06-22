@@ -15,12 +15,15 @@ cache:
     - .pnpm-store
     - node_modules/
 
+# Перед каждым заданием устанавливаем pnpm
+before_script:
+  - npm install -g pnpm
+  - pnpm config set store-dir .pnpm-store
+
 # Установка зависимостей
 install:
   stage: install
   script:
-    - npm install -g pnpm
-    - pnpm config set store-dir .pnpm-store
     - pnpm install
   artifacts:
     paths:
