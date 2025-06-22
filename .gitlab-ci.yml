@@ -1,5 +1,23 @@
+spec:
+  inputs:
+    node_version:
+      description: "Версия Node.js для использования в CI/CD"
+      default: "20-alpine"
+      options: ["16-alpine", "18-alpine", "20-alpine"]
+    run_lint:
+      description: "Запускать ли проверку линтером"
+      type: boolean
+      default: true
+    run_tests:
+      description: "Запускать ли тесты"
+      type: boolean
+      default: true
+    cache_key:
+      description: "Ключ для кэширования зависимостей"
+      default: "${CI_COMMIT_REF_SLUG}"
+
 # Базовый образ для всех заданий
-image: node:20-alpine
+image: node:$[[ inputs.node_version ]]
 
 # Определение стадий конвейера
 stages:
@@ -11,7 +29,7 @@ stages:
 
 # Кэширование зависимостей для ускорения сборки
 cache:
-  key: ${CI_COMMIT_REF_SLUG}
+  key: $[[ inputs.cache_key ]]
   paths:
     - .pnpm-store
     - node_modules/
@@ -35,6 +53,10 @@ lint:
     - pnpm lint:scss
   dependencies:
     - install
+  rules:
+    - if: $[[ inputs.run_lint ]] == true
+      when: on_success
+    - when: never
 
 # Запуск тестов
 test:
@@ -43,6 +65,10 @@ test:
     - pnpm test
   dependencies:
     - install
+  rules:
+    - if: $[[ inputs.run_tests ]] == true
+      when: on_success
+    - when: never
 
 # Сборка проекта
 build:
