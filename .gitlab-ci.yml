@@ -1,0 +1,83 @@
+# Базовый образ для всех заданий
+image: node:20-alpine
+
+# Определение стадий конвейера
+stages:
+  - install
+  - lint
+  - test
+  - build
+#  - deploy
+
+# Кэширование зависимостей для ускорения сборки
+cache:
+  key: ${CI_COMMIT_REF_SLUG}
+  paths:
+    - .pnpm-store
+    - node_modules/
+
+# Установка зависимостей
+install:
+  stage: install
+  script:
+    - npm install -g pnpm
+    - pnpm config set store-dir .pnpm-store
+    - pnpm install
+  artifacts:
+    paths:
+      - node_modules/
+
+# Проверка кода линтерами
+lint:
+  stage: lint
+  script:
+    - pnpm lint:ts
+    - pnpm lint:scss
+  dependencies:
+    - install
+
+# Запуск тестов
+test:
+  stage: test
+  script:
+    - pnpm test
+  dependencies:
+    - install
+
+# Сборка проекта
+build:
+  stage: build
+  script:
+    - pnpm build
+  artifacts:
+    paths:
+      - dist/
+  dependencies:
+    - install
+
+## Деплой на тестовый сервер
+#deploy_staging:
+#  stage: deploy
+#  script:
+#    - echo "Деплой на тестовый сервер"
+#    # Здесь будут команды для деплоя
+#  environment:
+#    name: staging
+#  only:
+#    - develop
+#  dependencies:
+#    - build
+
+## Деплой на продакшн
+#deploy_production:
+#  stage: deploy
+#  script:
+#    - echo "Деплой на продакшн"
+#    # Здесь будут команды для деплоя
+#  environment:
+#    name: production
+#  only:
+#    - main
+#  dependencies:
+#    - build
+#  when: manual # Ручной запуск деплоя на продакшн
