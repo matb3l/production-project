@@ -2,8 +2,8 @@ import { Box } from '@mui/material'
 import styles from './header.module.scss'
 import { Button } from '@src/shared/ui/Button/Button'
 import { useCallback, useState } from 'react'
-import { Modal } from '@src/shared/ui'
 import { useTranslation } from 'react-i18next'
+import { LoginModal } from '@app/features/authByUserName'
 
 export const Header = () => {
   const { t } = useTranslation()
@@ -24,9 +24,7 @@ export const Header = () => {
           {t('Войти')}
         </Button>
       </Box>
-      <Modal isOpen={isOpenModal} onClose={closeModal}>
-        {t('12333')}
-      </Modal>
+      <LoginModal isOpen={isOpenModal} onClose={closeModal} />
     </Box>
   )
 }

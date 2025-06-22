@@ -3,5 +3,8 @@
   "На главную": "To the main page",
   "О сайте": "About the site",
   "Короткий язык": "En",
-  "Войти": "Login"
+  "Войти": "Login",
+  "Авторизоваться": "login",
+  "Введите username": "Enter username",
+  "Введите пароль": "Enter password"
 }
