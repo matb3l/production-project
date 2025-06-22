@@ -16,6 +16,8 @@ spec:
       description: "Ключ для кэширования зависимостей"
       default: "${CI_COMMIT_REF_SLUG}"
 
+---
+
 # Базовый образ для всех заданий
 image: node:$[[ inputs.node_version ]]
 
