@@ -27,7 +27,6 @@ stages:
   - lint
   - test
   - build
-#  - deploy
 
 # Кэширование зависимостей для ускорения сборки
 cache:
@@ -56,8 +55,8 @@ lint:
   dependencies:
     - install
   rules:
-    - if: $[[ inputs.run_lint ]] == true
-      when: on_success
+    - if: '$[[ inputs.run_lint ]] == "true"'
+      when: always
     - when: never
 
 # Запуск тестов
@@ -68,8 +67,8 @@ test:
   dependencies:
     - install
   rules:
-    - if: $[[ inputs.run_tests ]] == true
-      when: on_success
+    - if: '$[[ inputs.run_tests ]] == "true"'
+      when: always
     - when: never
 
 # Сборка проекта
@@ -82,30 +81,3 @@ build:
       - dist/
   dependencies:
     - install
-
-## Деплой на тестовый сервер
-#deploy_staging:
-#  stage: deploy
-#  script:
-#    - echo "Деплой на тестовый сервер"
-#    # Здесь будут команды для деплоя
-#  environment:
-#    name: staging
-#  only:
-#    - develop
-#  dependencies:
-#    - build
-
-## Деплой на продакшн
-#deploy_production:
-#  stage: deploy
-#  script:
-#    - echo "Деплой на продакшн"
-#    # Здесь будут команды для деплоя
-#  environment:
-#    name: production
-#  only:
-#    - main
-#  dependencies:
-#    - build
-#  when: manual # Ручной запуск деплоя на продакшн
