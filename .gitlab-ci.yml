@@ -1,5 +1,5 @@
-# Используем образ с предустановленным pnpm
-image: pnpm/pnpm:8
+# Используем образ с Node.js
+image: node:20-alpine
 
 # Определение стадий конвейера
 stages:
@@ -14,9 +14,11 @@ cache:
   paths:
     - .pnpm-store
     - node_modules/
+    - /root/.npm # Кэшируем глобальные npm пакеты
 
-# Настраиваем pnpm
+# Настраиваем pnpm один раз для всего пайплайна
 before_script:
+  - npm install -g pnpm
   - pnpm config set store-dir .pnpm-store
 
 # Установка зависимостей
