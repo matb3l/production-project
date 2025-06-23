@@ -6,6 +6,12 @@ describe('getCounter', () => {
   it('should return counter value', () => {
     const state: StateSchema = {
       counter: { value: 10 },
+      user: {
+        authData: {
+          id: "1",
+          username: "123"
+        }
+      }
     }
 
     expect(getCounter(state)).toEqual({ value: 10 })
