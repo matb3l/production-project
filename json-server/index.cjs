@@ -3,7 +3,6 @@ const fs = require('fs');
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const jsonServer = require('json-server');
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-// eslint-disable-next-line @typescript-eslint/no-require-imports
 const path = require('path');
 
 const server = jsonServer.create();
