@@ -8,13 +8,16 @@ import pluginReact from 'eslint-plugin-react'
 import airbnbBase from 'eslint-config-airbnb-base'
 import airbnbTypescript from 'eslint-config-airbnb-typescript'
 import i18next from 'eslint-plugin-i18next'
+import reactHooksPlugin from 'eslint-plugin-react-hooks'
 
 /** @type {import('eslint').Linter.Config[]} */
 export default [
-  // Переносим это выше
   pluginReact.configs.flat.recommended,
   {
     files: ['**/*.{js,mjs,cjs,ts,jsx,tsx}'],
+    plugins: {
+      'react-hooks': reactHooksPlugin,
+    },
     languageOptions: {
       globals: {
         ...globals.browser,
@@ -29,7 +32,10 @@ export default [
     rules: {
       ...airbnbBase.rules,
       ...airbnbTypescript.rules,
+      'react-hooks/rules-of-hooks': 'error',
+      'react-hooks/exhaustive-deps': 'warn',
       'react/react-in-jsx-scope': 'off',
+      'react/display-name': 'off',
       '@typescript-eslint/ban-ts-comment': [
         'warn',
         {
