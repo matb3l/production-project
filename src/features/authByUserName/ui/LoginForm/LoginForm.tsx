@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import styles from './LoginForm.module.scss'
 import { ChangeEvent, memo, useCallback } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { loginActions } from '@features/authByUserName/model/slice/loginSlice.ts'
+import { loginActions } from '../../model/slice/loginSlice'
 import {
   getError,
   getIsLoading,
@@ -62,7 +62,7 @@ export const LoginForm = memo(() => {
         onChange={onChangePassword}
         value={password}
       />
-      <Button type="button" onClick={onSubmit} disabled={isLoading}>
+      <Button onClick={onSubmit} disabled={isLoading}>
         {t('Авторизоваться')}
       </Button>
     </div>
