@@ -9,12 +9,12 @@ import { StoreProvider } from '@app/providers/StoreProvider'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <StoreProvider>
-      <BrowserRouter>
+    <BrowserRouter>
+      <StoreProvider>
         <ErrorBoundary>
           <App />
         </ErrorBoundary>
-      </BrowserRouter>
-    </StoreProvider>
+      </StoreProvider>
+    </BrowserRouter>
   </StrictMode>,
 )

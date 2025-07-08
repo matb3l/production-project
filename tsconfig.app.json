@@ -31,7 +31,6 @@
       "@shared/*": ["./src/shared/*"],
       "@ui/*": ["./src/shared/ui/*"],
       "@lib/*": ["./src/shared/lib/*"],
-      "@api/*": ["./src/shared/api/*"]
     }
   },
   "include": [
