@@ -15,6 +15,7 @@ cache:
     - .pnpm-store
     - node_modules/
     - /root/.npm # Кэшируем глобальные npm пакеты
+  policy: pull-push # Явно указываем политику кэша: загружать и обновлять
 
 # Настраиваем pnpm один раз для всего пайплайна
 before_script:
@@ -26,9 +27,7 @@ install:
   stage: install
   script:
     - pnpm install
-  artifacts:
-    paths:
-      - node_modules/
+  # Удаляем artifacts, так как будем использовать кэш
 
 # Проверка кода линтерами
 lint:
@@ -36,16 +35,14 @@ lint:
   script:
     - pnpm lint:ts
     - pnpm lint:scss
-  dependencies:
-    - install
+  # Удаляем dependencies, так как будем использовать кэш
 
 # Запуск тестов
 test:
   stage: test
   script:
     - pnpm test
-  dependencies:
-    - install
+  # Удаляем dependencies, так как будем использовать кэш
 
 # Сборка проекта
 build:
@@ -55,8 +52,7 @@ build:
   artifacts:
     paths:
       - dist/
-  dependencies:
-    - install
+  # Удаляем dependencies, так как будем использовать кэш
   only:
     - main
     - develop
