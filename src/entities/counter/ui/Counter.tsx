@@ -1,11 +1,12 @@
 import { Typography } from '@mui/material'
 import { Button } from '@shared/ui'
-import { useDispatch, useSelector } from 'react-redux'
+import { useSelector } from 'react-redux'
 import { counterActions } from '@entities/counter'
 import { getCounterValue } from '../model/selectors/getCounterValue/getCounterValue'
+import { useAppDispatch } from '@app/providers/StoreProvider'
 
 export const Counter = () => {
-  const dispatch = useDispatch()
+  const dispatch = useAppDispatch()
   const counterState = useSelector(getCounterValue)
   const increment = () => {
     dispatch(counterActions.increment())

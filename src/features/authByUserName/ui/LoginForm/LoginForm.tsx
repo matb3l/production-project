@@ -3,7 +3,7 @@ import { Button } from '@shared/ui'
 import { useTranslation } from 'react-i18next'
 import styles from './LoginForm.module.scss'
 import { ChangeEvent, memo, useCallback } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
+import { useSelector } from 'react-redux'
 import { loginActions } from '../../model/slice/loginSlice'
 import {
   getError,
@@ -12,10 +12,11 @@ import {
   getUsername,
 } from '../../model/selectors/getLogin'
 import { loginByUsername } from '@features/authByUserName/model/services/loginByUsername.ts'
+import { useAppDispatch } from '@app/providers/StoreProvider'
 
 export const LoginForm = memo(() => {
   const { t } = useTranslation()
-  const dispatch = useDispatch()
+  const dispatch = useAppDispatch()
   const username = useSelector(getUsername)
   const password = useSelector(getPassword)
   const error = useSelector(getError)
@@ -36,8 +37,6 @@ export const LoginForm = memo(() => {
   )
 
   const onSubmit = useCallback(() => {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
     dispatch(loginByUsername({ username, password }))
   }, [dispatch, password, username])
 

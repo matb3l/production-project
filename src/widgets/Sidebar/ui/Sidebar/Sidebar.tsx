@@ -6,8 +6,9 @@ import { LangSwitcher } from '@widgets/LangSwitcher'
 import { AppLink } from '@ui/AppLink/AppLink.tsx'
 import { RoutePath } from '@shared/config/routeConfig/routeConfig.tsx'
 import { useTranslation } from 'react-i18next'
-import HomeIconSvg from '@shared/assets/icons/home-icon.svg?react'
-import SiteIconSvg from '@shared/assets/icons/site-icon.svg?react'
+import HomeIcon from '@mui/icons-material/Home'
+import NewspaperIcon from '@mui/icons-material/Newspaper'
+import AccountBoxIcon from '@mui/icons-material/AccountBox'
 
 export const Sidebar = () => {
   const [collapsed, setCollapsed] = useState(false)
@@ -24,12 +25,16 @@ export const Sidebar = () => {
     >
       <div className={styles.LinksWrapper}>
         <AppLink to={RoutePath.main} className={styles.Link}>
-          <HomeIconSvg className={styles.Icon} />
+          <HomeIcon />
           {!collapsed && <span>{t('На главную')}</span>}
         </AppLink>
         <AppLink to={RoutePath.about} className={styles.Link}>
-          <SiteIconSvg className={styles.Icon} />
+          <NewspaperIcon />
           {!collapsed && <span>{t('О сайте')}</span>}
+        </AppLink>
+        <AppLink to={RoutePath.profile} className={styles.Link}>
+          <AccountBoxIcon />
+          {!collapsed && <span>{t('Профиль')}</span>}
         </AppLink>
       </div>
       <div className={styles.collapseWrapper}>

@@ -4,14 +4,15 @@ import { Button } from '@src/shared/ui/Button/Button'
 import { useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { LoginModal } from '@src/features/authByUserName'
-import { useDispatch, useSelector } from 'react-redux'
+import { useSelector } from 'react-redux'
 import { getAuthUserData, userActions } from '@entities/user'
+import { useAppDispatch } from '@app/providers/StoreProvider'
 
 export const Header = () => {
   const { t } = useTranslation()
   const [isOpenModal, setIsOpenModal] = useState(false)
 
-  const dispatch = useDispatch()
+  const dispatch = useAppDispatch()
   const authData = useSelector(getAuthUserData)
 
   const closeModal = useCallback(() => {

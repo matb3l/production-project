@@ -27,7 +27,6 @@ install:
   stage: install
   script:
     - pnpm install
-  # Удаляем artifacts, так как будем использовать кэш
 
 # Проверка кода линтерами
 lint:

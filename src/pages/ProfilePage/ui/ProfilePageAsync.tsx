@@ -1,10 +1,10 @@
 import { lazy, Suspense } from 'react'
 import { PageLoader } from '@widgets/PageLoader'
 
-const MainPage = lazy(() => import('./MainPage'))
+const ProfilePage = lazy(() => import('./ProfilePage.tsx'))
 
-export const MainPageAsync = () => (
+export const ProfilePageAsync = () => (
   <Suspense fallback={<PageLoader />}>
-    <MainPage />
+    <ProfilePage />
   </Suspense>
 )

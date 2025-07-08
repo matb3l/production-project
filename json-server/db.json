@@ -8,7 +8,14 @@
     { "id": "2", "text": "another comment about post 1", "postId": "1" }
   ],
   "profile": {
-    "name": "typicode"
+    "name": "Матвей",
+    "lastname": "Белавин",
+    "age": "22",
+    "currency": "RUB",
+    "country": "Russia",
+    "city": "Moscow",
+    "username": "admin",
+    "avatar": "https://pic2-cdn.creality.com/model/79725e77ebdae5148873b6ed6178730f.jpg"
   },
   "users": [
     {
