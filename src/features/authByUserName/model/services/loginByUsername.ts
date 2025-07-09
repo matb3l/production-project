@@ -1,8 +1,8 @@
 import { createAsyncThunk } from '@reduxjs/toolkit'
 import { User, userActions } from '@entities/user'
 import i18n from 'i18next'
-import { USER_LOCALSTORAGE_KEY } from '@shared/const/localstorage.ts'
-import { ThunkExtraArg } from '@app/providers/StoreProvider/config/stateSchema.ts'
+import { USER_LOCALSTORAGE_KEY } from '@shared/const/localstorage'
+import { ThunkExtraArg } from '@app/providers/StoreProvider/config/stateSchema'
 
 interface LoginByUsernameProps {
   username: string
@@ -12,7 +12,10 @@ interface LoginByUsernameProps {
 export const loginByUsername = createAsyncThunk<
   User,
   LoginByUsernameProps,
-  { extra: ThunkExtraArg; rejectWithValue: string }
+  {
+    extra: ThunkExtraArg
+    rejectValue: string
+  }
 >(
   'login/loginByUsername',
   async (authData, { dispatch, extra, rejectWithValue }) => {
@@ -27,7 +30,9 @@ export const loginByUsername = createAsyncThunk<
 
       dispatch(userActions.setUserData(response.data))
 
-      extra.navigate('/profile')
+      if (extra.navigate) {
+        extra.navigate('/profile')
+      }
 
       return response.data
     } catch (error) {

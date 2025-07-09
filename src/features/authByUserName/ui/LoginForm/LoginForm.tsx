@@ -11,8 +11,8 @@ import {
   getPassword,
   getUsername,
 } from '../../model/selectors/getLogin'
-import { loginByUsername } from '@features/authByUserName/model/services/loginByUsername.ts'
-import { useAppDispatch } from '@app/providers/StoreProvider'
+import { loginByUsername } from '../../model/services/loginByUsername.ts'
+import { useAppDispatch } from '@app/providers/StoreProvider/config/store.ts'
 
 export const LoginForm = memo(() => {
   const { t } = useTranslation()

@@ -1,5 +1,10 @@
-import { configureStore, ReducersMapObject } from '@reduxjs/toolkit'
-import { StateSchema } from './stateSchema'
+import {
+  Action,
+  configureStore,
+  ReducersMapObject,
+  ThunkDispatch,
+} from '@reduxjs/toolkit'
+import { StateSchema, ThunkExtraArg } from './stateSchema'
 import { counterReducer } from '@entities/counter'
 import { userReducer } from '@entities/user'
 import { loginReducer } from '@features/authByUserName'
@@ -35,5 +40,5 @@ export const createReduxStore = (
   })
 }
 
-export type AppDispatch = ReturnType<typeof createReduxStore>['dispatch']
-export const useAppDispatch = useDispatch.withTypes<AppDispatch>()
+export type AppDispatch = ThunkDispatch<StateSchema, ThunkExtraArg, Action>
+export const useAppDispatch = () => useDispatch<AppDispatch>()
