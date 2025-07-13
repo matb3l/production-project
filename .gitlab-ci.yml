@@ -3,69 +3,79 @@ image: node:20-alpine
 
 # Определение стадий конвейера
 stages:
-  - install
-  - lint
-  - test
+  - prepare
+  - quality
   - build
 
 # Глобальные переменные
 variables:
   PNPM_VERSION: '10.8.1'
+  # Отключаем автоматическое клонирование для ускорения
+  GIT_STRATEGY: clone
 
-# Кэширование зависимостей для ускорения сборки
-cache:
-  key: ${CI_COMMIT_REF_SLUG}
+# Глобальный before_script для установки pnpm
+before_script:
+  - |
+    if ! command -v pnpm &> /dev/null || [ "$(pnpm --version)" != "$PNPM_VERSION" ]; then
+      echo "Installing pnpm $PNPM_VERSION..."
+      npm install -g pnpm@$PNPM_VERSION
+    fi
+  - pnpm config set store-dir .pnpm-store
+
+# Глобальный кэш
+cache: &global_cache
+  key:
+    files:
+      - pnpm-lock.yaml
   paths:
     - .pnpm-store
     - node_modules/
   policy: pull
 
-# Установка зависимостей
+# Установка зависимостей - выполняется только при изменении pnpm-lock.yaml
 install:
-  stage: install
+  stage: prepare
   cache:
-    key: ${CI_COMMIT_REF_SLUG}
-    paths:
-      - .pnpm-store
-      - node_modules/
+    <<: *global_cache
     policy: pull-push
-  before_script:
-    # Проверяем, установлен ли pnpm нужной версии
-    - |
-      if ! command -v pnpm &> /dev/null || [ "$(pnpm --version)" != "$PNPM_VERSION" ]; then
-        echo "Installing pnpm $PNPM_VERSION..."
-        npm install -g pnpm@$PNPM_VERSION
-      fi
-    - pnpm config set store-dir .pnpm-store
   script:
     - pnpm install --frozen-lockfile
   artifacts:
     paths:
       - node_modules/
       - .pnpm-store
-    expire_in: 1 hour
+    expire_in: 2 hours
+  # Выполняем install только если изменились зависимости
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH == "main"'
+    - if: '$CI_COMMIT_BRANCH == "develop"'
+    - changes:
+        - pnpm-lock.yaml
+        - package.json
 
-# Проверка TypeScript кода
-lint:ts:
-  stage: lint
+# Параллельные проверки качества кода
+quality:
+  stage: quality
   needs: ['install']
+  parallel:
+    matrix:
+      - JOB_NAME: 'lint:ts'
+        SCRIPT: 'pnpm lint:ts'
+      - JOB_NAME: 'lint:scss'
+        SCRIPT: 'pnpm lint:scss'
+      - JOB_NAME: 'test'
+        SCRIPT: 'pnpm test'
   script:
-    - pnpm lint:ts
-
-# Проверка SCSS стилей
-lint:scss:
-  stage: lint
-  needs: ['install']
-  script:
-    - pnpm lint:scss
-
-# Запуск тестов
-test:
-  stage: test
-  needs: ['install']
-  script:
-    - pnpm test
+    - echo "Running $JOB_NAME"
+    - $SCRIPT
   coverage: '/All files[^|]*\|[^|]*\s+([\d\.]+)/'
+  artifacts:
+    when: always
+    reports:
+      junit:
+        - junit.xml
+    expire_in: 1 week
 
 # Сборка проекта
 build:
@@ -80,3 +90,20 @@ build:
   only:
     - main
     - develop
+
+# Альтернативный вариант - создать образ с зависимостями
+.build_docker_image:
+  stage: prepare
+  image: docker:latest
+  services:
+    - docker:dind
+  script:
+    - docker build -t $CI_REGISTRY_IMAGE:deps-$CI_COMMIT_SHA -f Dockerfile.deps
+      .
+    - docker push $CI_REGISTRY_IMAGE:deps-$CI_COMMIT_SHA
+  rules:
+    - changes:
+        - pnpm-lock.yaml
+        - package.json
+        - Dockerfile.deps
+      when: manual
