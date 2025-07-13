@@ -1,4 +1,4 @@
-# Используем образ с Node.js
+# Используем образ с Node.js и pnpm
 image: node:20-alpine
 
 # Определение стадий конвейера
@@ -8,50 +8,75 @@ stages:
   - test
   - build
 
+# Глобальные переменные
+variables:
+  PNPM_VERSION: '10.8.1'
+
 # Кэширование зависимостей для ускорения сборки
 cache:
   key: ${CI_COMMIT_REF_SLUG}
   paths:
     - .pnpm-store
     - node_modules/
-    - /root/.npm # Кэшируем глобальные npm пакеты
-  policy: pull-push # Явно указываем политику кэша: загружать и обновлять
-
-# Настраиваем pnpm один раз для всего пайплайна
-before_script:
-  - npm install -g pnpm
-  - pnpm config set store-dir .pnpm-store
+  policy: pull
 
 # Установка зависимостей
 install:
   stage: install
+  cache:
+    key: ${CI_COMMIT_REF_SLUG}
+    paths:
+      - .pnpm-store
+      - node_modules/
+    policy: pull-push
+  before_script:
+    # Проверяем, установлен ли pnpm нужной версии
+    - |
+      if ! command -v pnpm &> /dev/null || [ "$(pnpm --version)" != "$PNPM_VERSION" ]; then
+        echo "Installing pnpm $PNPM_VERSION..."
+        npm install -g pnpm@$PNPM_VERSION
+      fi
+    - pnpm config set store-dir .pnpm-store
   script:
-    - pnpm install
+    - pnpm install --frozen-lockfile
+  artifacts:
+    paths:
+      - node_modules/
+      - .pnpm-store
+    expire_in: 1 hour
 
-# Проверка кода линтерами
-lint:
+# Проверка TypeScript кода
+lint:ts:
   stage: lint
+  needs: ['install']
   script:
     - pnpm lint:ts
+
+# Проверка SCSS стилей
+lint:scss:
+  stage: lint
+  needs: ['install']
+  script:
     - pnpm lint:scss
-  # Удаляем dependencies, так как будем использовать кэш
 
 # Запуск тестов
 test:
   stage: test
+  needs: ['install']
   script:
     - pnpm test
-  # Удаляем dependencies, так как будем использовать кэш
+  coverage: '/All files[^|]*\|[^|]*\s+([\d\.]+)/'
 
 # Сборка проекта
 build:
   stage: build
+  needs: ['install']
   script:
     - pnpm build
   artifacts:
     paths:
       - dist/
-  # Удаляем dependencies, так как будем использовать кэш
+    expire_in: 1 week
   only:
     - main
     - develop
