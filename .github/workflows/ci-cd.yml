@@ -158,7 +158,7 @@ jobs:
   # Деплой на GitHub Pages
   deploy-gh-pages:
     name: 🚀 Deploy to GitHub Pages
-    needs: [build, storybook]
+    needs: [build]
     runs-on: ubuntu-latest
     timeout-minutes: 10
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
