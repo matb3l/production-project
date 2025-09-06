@@ -29,8 +29,6 @@ concurrency:
 jobs:
   setup:
     runs-on: ubuntu-latest
-    outputs:
-      cache-key: ${{ steps.cache-dependencies.outputs.cache-primary-key }}
     steps:
       - name: ⬇️ Checkout repository
         uses: actions/checkout@v4
@@ -49,7 +47,6 @@ jobs:
           run_install: false
 
       - name: 💾 Cache PNPM store
-        id: cache-dependencies
         uses: actions/cache@v4
         with:
           path: ${{ env.PNPM_CACHE_FOLDER }}
@@ -61,6 +58,7 @@ jobs:
         run: |
           pnpm config set store-dir ${{ env.PNPM_CACHE_FOLDER }}
           pnpm install --frozen-lockfile --prefer-offline
+  
 
   # Проверка качества кода
   quality:
@@ -154,43 +152,6 @@ jobs:
         with:
           name: build-${{ github.sha }}
           path: dist/
-          retention-days: 14
-          if-no-files-found: error
-
-  # Сборка Storybook
-  storybook:
-    name: 📚 Build Storybook
-    needs: quality
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop' || github.event_name == 'pull_request'
-
-    steps:
-      - name: ⬇️ Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 1
-
-      - name: 📦 Setup PNPM (reuse)
-        uses: pnpm/action-setup@v3
-        with:
-          version: ${{ env.PNPM_VERSION }}
-          run_install: false
-
-      - name: 💾 Restore PNPM cache
-        uses: actions/cache@v4
-        with:
-          path: ${{ env.PNPM_CACHE_FOLDER }}
-          key: ${{ needs.setup.outputs.cache-key }}
-
-      - name: 🏗️ Build Storybook
-        run: pnpm build-storybook
-
-      - name: 📦 Upload Storybook artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: storybook-${{ github.sha }}
-          path: storybook-static/
           retention-days: 14
           if-no-files-found: error
 
