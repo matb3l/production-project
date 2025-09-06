@@ -177,12 +177,6 @@ jobs:
           name: build-${{ github.sha }}
           path: dist/
 
-      - name: 📥 Download Storybook artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: storybook-${{ github.sha }}
-          path: dist/storybook/
-
       - name: 🚀 Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
         with:
