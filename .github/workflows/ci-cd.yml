@@ -53,14 +53,15 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
 
+      # Важно: сначала установить pnpm, а затем настроить кэш
       - name: 📦 Setup PNPM
         uses: pnpm/action-setup@v3
         with:
           version: ${{ env.PNPM_VERSION }}
           run_install: false
 
+      # Теперь настраиваем кэш после установки pnpm
       - name: 💾 Cache dependencies
         id: cache-dependencies
         uses: actions/cache@v4
@@ -110,8 +111,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
 
+      # Важно: сначала установить pnpm
       - name: 📦 Setup PNPM
         uses: pnpm/action-setup@v3
         with:
@@ -162,8 +163,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'pnpm'
 
+      # Важно: сначала установить pnpm
       - name: 📦 Setup PNPM
         uses: pnpm/action-setup@v3
         with:
@@ -189,3 +190,81 @@ jobs:
           retention-days: 7
           if-no-files-found: error
 
+  # Сборка Storybook
+  storybook:
+    name: 📚 Build Storybook
+    needs: quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop' || github.event_name == 'pull_request'
+
+    steps:
+      - name: ⬇️ Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: 🔧 Setup Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      # Важно: сначала установить pnpm
+      - name: 📦 Setup PNPM
+        uses: pnpm/action-setup@v3
+        with:
+          version: ${{ env.PNPM_VERSION }}
+          run_install: false
+
+      - name: 💾 Restore dependencies cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ env.PNPM_CACHE_FOLDER }}
+            node_modules
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+
+      - name: 🏗️ Build Storybook
+        run: pnpm build-storybook
+
+      - name: 📦 Upload Storybook artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: storybook-${{ github.sha }}
+          path: storybook-static/
+          retention-days: 7
+          if-no-files-found: error
+
+  # Деплой на GitHub Pages (для main ветки)
+  deploy-gh-pages:
+    name: 🚀 Deploy to GitHub Pages
+    needs: [build, storybook]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    # Необходимые разрешения для деплоя на GitHub Pages
+    permissions:
+      contents: write
+
+    steps:
+      - name: ⬇️ Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 📥 Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-${{ github.sha }}
+          path: dist/
+
+      - name: 📥 Download Storybook artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: storybook-${{ github.sha }}
+          path: dist/storybook/
+
+      - name: 🚀 Deploy to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: dist
+          branch: gh-pages
+          clean: true
