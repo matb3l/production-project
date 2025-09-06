@@ -1,4 +1,4 @@
-name: CI/CD Pipeline
+name: CI/CD
 
 on:
   push:
@@ -6,179 +6,97 @@ on:
     paths-ignore:
       - '**.md'
       - 'docs/**'
-      - '.github/ISSUE_TEMPLATE/**'
   pull_request:
     branches: [main, develop]
     paths-ignore:
       - '**.md'
       - 'docs/**'
-      - '.github/ISSUE_TEMPLATE/**'
   workflow_dispatch:
 
 env:
-  PNPM_VERSION: '10.8.1'
-  NODE_VERSION: '20'
+  PNPM_VERSION: 10.8.1
+  NODE_VERSION: 20
   PNPM_CACHE_FOLDER: .pnpm-store
 
-# Отмена предыдущих workflow в той же ветке
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
-# 🔧 Повторно используемый шаг для настройки окружения
 jobs:
-  setup:
+  quality:
+    name: 🧪 Quality Checks
     runs-on: ubuntu-latest
     steps:
-      - name: ⬇️ Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 1
-
-      - name: 🔧 Setup Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-
-      - name: 📦 Setup PNPM
-        uses: pnpm/action-setup@v3
+      - uses: pnpm/action-setup@v3
         with:
           version: ${{ env.PNPM_VERSION }}
           run_install: false
-
-      - name: 💾 Cache PNPM store
-        uses: actions/cache@v4
+      - uses: actions/cache@v4
         with:
           path: ${{ env.PNPM_CACHE_FOLDER }}
           key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-
-
-      - name: 📥 Install dependencies
-        run: |
-          pnpm config set store-dir ${{ env.PNPM_CACHE_FOLDER }}
-          pnpm install --frozen-lockfile --prefer-offline
-  
-
-  # Проверка качества кода
-  quality:
-    name: 🧪 Quality Checks
-    needs: setup
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    strategy:
-      fail-fast: false
-      matrix:
-        task: [lint-ts, lint-scss, test]
-        include:
-          - task: lint-ts
-            name: TypeScript Linting
-            command: pnpm lint:ts
-          - task: lint-scss
-            name: SCSS Linting
-            command: pnpm lint:scss
-          - task: test
-            name: Unit Tests
-            command: pnpm test
-
-    steps:
-      - name: ⬇️ Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 1
-
-      - name: 📦 Setup PNPM (reuse)
-        uses: pnpm/action-setup@v3
-        with:
-          version: ${{ env.PNPM_VERSION }}
-          run_install: false
-
-      - name: 💾 Restore PNPM cache
-        uses: actions/cache@v4
-        with:
-          path: ${{ env.PNPM_CACHE_FOLDER }}
-          key: ${{ needs.setup.outputs.cache-key }}
-
-      - name: 🔍 Run ${{ matrix.name }}
-        run: ${{ matrix.command }}
-
-      - name: 📊 Upload test results
-        if: matrix.task == 'test' && always()
-        uses: actions/upload-artifact@v4
+          restore-keys: ${{ runner.os }}-pnpm-
+      - run: pnpm config set store-dir ${{ env.PNPM_CACHE_FOLDER }}
+      - run: pnpm install --frozen-lockfile --prefer-offline
+      - run: pnpm lint:ts
+      - run: pnpm lint:scss
+      - run: pnpm test -- --ci --reporter=junit --reporter-options output=junit.xml
+      - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: test-results
           path: junit.xml
-          retention-days: 14
-
-      - name: 📝 Upload coverage report
-        if: matrix.task == 'test' && success()
-        uses: codecov/codecov-action@v4
+          retention-days: 7
+      - uses: codecov/codecov-action@v4
+        if: success()
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          flags: unit-tests
           fail_ci_if_error: false
 
-  # Сборка проекта
   build:
-    name: 🏗️ Build Project
+    name: 🏗️ Build
     needs: quality
     runs-on: ubuntu-latest
-    timeout-minutes: 15
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop' || github.event_name == 'pull_request'
-
     steps:
-      - name: ⬇️ Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          fetch-depth: 1
-
-      - name: 📦 Setup PNPM (reuse)
-        uses: pnpm/action-setup@v3
+          node-version: ${{ env.NODE_VERSION }}
+      - uses: pnpm/action-setup@v3
         with:
           version: ${{ env.PNPM_VERSION }}
           run_install: false
-
-      - name: 💾 Restore PNPM cache
-        uses: actions/cache@v4
+      - uses: actions/cache@v4
         with:
           path: ${{ env.PNPM_CACHE_FOLDER }}
-          key: ${{ needs.setup.outputs.cache-key }}
-
-      - name: 🏗️ Build application
-        run: pnpm build
-
-      - name: 📦 Upload build artifacts
-        uses: actions/upload-artifact@v4
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: ${{ runner.os }}-pnpm-
+      - run: pnpm config set store-dir ${{ env.PNPM_CACHE_FOLDER }}
+      - run: pnpm install --frozen-lockfile --prefer-offline
+      - run: pnpm build
+      - uses: actions/upload-artifact@v4
         with:
           name: build-${{ github.sha }}
           path: dist/
-          retention-days: 14
           if-no-files-found: error
+          retention-days: 7
 
-  # Деплой на GitHub Pages
-  deploy-gh-pages:
+  deploy:
     name: 🚀 Deploy to GitHub Pages
-    needs: [build]
+    needs: build
     runs-on: ubuntu-latest
-    timeout-minutes: 10
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
     permissions:
       contents: write
       pages: write
       id-token: write
-
     steps:
-      - name: ⬇️ Checkout repository
-        uses: actions/checkout@v4
-
-      - name: 📥 Download build artifacts
-        uses: actions/download-artifact@v4
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
         with:
           name: build-${{ github.sha }}
           path: dist/
-
-      - name: 🚀 Deploy to GitHub Pages
-        uses: JamesIves/github-pages-deploy-action@v4
+      - uses: JamesIves/github-pages-deploy-action@v4
         with:
           folder: dist
           branch: gh-pages
