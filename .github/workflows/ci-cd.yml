@@ -1,0 +1,191 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - '.github/ISSUE_TEMPLATE/**'
+  pull_request:
+    branches: [main, develop]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - '.github/ISSUE_TEMPLATE/**'
+  workflow_dispatch:
+
+env:
+  PNPM_VERSION: '10.8.1'
+  NODE_VERSION: '20'
+  PNPM_CACHE_FOLDER: .pnpm-store
+
+# Отмена предыдущих запущенных workflow в той же ветке
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Установка зависимостей с эффективным кэшированием
+  install:
+    name: 🔧 Install Dependencies
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      cache-hit: ${{ steps.cache-dependencies.outputs.cache-hit }}
+
+    steps:
+      - name: ⬇️ Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: 🔄 Check for dependency changes
+        id: check-changes
+        uses: dorny/paths-filter@v2
+        with:
+          filters: |
+            dependencies:
+              - 'pnpm-lock.yaml'
+              - 'package.json'
+
+      - name: 🔧 Setup Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: 📦 Setup PNPM
+        uses: pnpm/action-setup@v3
+        with:
+          version: ${{ env.PNPM_VERSION }}
+          run_install: false
+
+      - name: 💾 Cache dependencies
+        id: cache-dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ env.PNPM_CACHE_FOLDER }}
+            node_modules
+            ~/.cache/Cypress
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-
+
+      - name: 📥 Install dependencies
+        if: steps.cache-dependencies.outputs.cache-hit != 'true' || steps.check-changes.outputs.dependencies == 'true'
+        run: |
+          pnpm config set store-dir ${{ env.PNPM_CACHE_FOLDER }}
+          pnpm install --frozen-lockfile --prefer-offline
+
+  # Проверка качества кода (параллельно)
+  quality:
+    name: 🧪 Quality Checks
+    needs: install
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        task: [lint-ts, lint-scss, test]
+        include:
+          - task: lint-ts
+            name: TypeScript Linting
+            command: pnpm lint:ts
+          - task: lint-scss
+            name: SCSS Linting
+            command: pnpm lint:scss
+          - task: test
+            name: Unit Tests
+            command: pnpm test
+
+    steps:
+      - name: ⬇️ Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: 🔧 Setup Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: 📦 Setup PNPM
+        uses: pnpm/action-setup@v3
+        with:
+          version: ${{ env.PNPM_VERSION }}
+          run_install: false
+
+      - name: 💾 Restore dependencies cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ env.PNPM_CACHE_FOLDER }}
+            node_modules
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+
+      - name: 🔍 Run ${{ matrix.name }}
+        run: ${{ matrix.command }}
+
+      - name: 📊 Upload test results
+        if: matrix.task == 'test' && always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: junit.xml
+          retention-days: 7
+
+      - name: 📝 Upload coverage report
+        if: matrix.task == 'test' && success()
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: false
+
+  # Сборка проекта
+  build:
+    name: 🏗️ Build Project
+    needs: quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop' || github.event_name == 'pull_request'
+
+    steps:
+      - name: ⬇️ Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: 🔧 Setup Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: 📦 Setup PNPM
+        uses: pnpm/action-setup@v3
+        with:
+          version: ${{ env.PNPM_VERSION }}
+          run_install: false
+
+      - name: 💾 Restore dependencies cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ env.PNPM_CACHE_FOLDER }}
+            node_modules
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+
+      - name: 🏗️ Build application
+        run: pnpm build
+
+      - name: 📦 Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-${{ github.sha }}
+          path: dist/
+          retention-days: 7
+          if-no-files-found: error
+
