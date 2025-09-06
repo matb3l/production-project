@@ -20,70 +20,52 @@ env:
   NODE_VERSION: '20'
   PNPM_CACHE_FOLDER: .pnpm-store
 
-# Отмена предыдущих запущенных workflow в той же ветке
+# Отмена предыдущих workflow в той же ветке
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+# 🔧 Повторно используемый шаг для настройки окружения
 jobs:
-  # Установка зависимостей с эффективным кэшированием
-  install:
-    name: 🔧 Install Dependencies
+  setup:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
     outputs:
-      cache-hit: ${{ steps.cache-dependencies.outputs.cache-hit }}
-
+      cache-key: ${{ steps.cache-dependencies.outputs.cache-primary-key }}
     steps:
       - name: ⬇️ Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 1
 
-      - name: 🔄 Check for dependency changes
-        id: check-changes
-        uses: dorny/paths-filter@v2
-        with:
-          filters: |
-            dependencies:
-              - 'pnpm-lock.yaml'
-              - 'package.json'
-
       - name: 🔧 Setup Node.js ${{ env.NODE_VERSION }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
 
-      # Важно: сначала установить pnpm, а затем настроить кэш
       - name: 📦 Setup PNPM
         uses: pnpm/action-setup@v3
         with:
           version: ${{ env.PNPM_VERSION }}
           run_install: false
 
-      # Теперь настраиваем кэш после установки pnpm
-      - name: 💾 Cache dependencies
+      - name: 💾 Cache PNPM store
         id: cache-dependencies
         uses: actions/cache@v4
         with:
-          path: |
-            ${{ env.PNPM_CACHE_FOLDER }}
-            node_modules
-            ~/.cache/Cypress
+          path: ${{ env.PNPM_CACHE_FOLDER }}
           key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-pnpm-
 
       - name: 📥 Install dependencies
-        if: steps.cache-dependencies.outputs.cache-hit != 'true' || steps.check-changes.outputs.dependencies == 'true'
         run: |
           pnpm config set store-dir ${{ env.PNPM_CACHE_FOLDER }}
           pnpm install --frozen-lockfile --prefer-offline
 
-  # Проверка качества кода (параллельно)
+  # Проверка качества кода
   quality:
     name: 🧪 Quality Checks
-    needs: install
+    needs: setup
     runs-on: ubuntu-latest
     timeout-minutes: 15
     strategy:
@@ -107,25 +89,17 @@ jobs:
         with:
           fetch-depth: 1
 
-      - name: 🔧 Setup Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-
-      # Важно: сначала установить pnpm
-      - name: 📦 Setup PNPM
+      - name: 📦 Setup PNPM (reuse)
         uses: pnpm/action-setup@v3
         with:
           version: ${{ env.PNPM_VERSION }}
           run_install: false
 
-      - name: 💾 Restore dependencies cache
+      - name: 💾 Restore PNPM cache
         uses: actions/cache@v4
         with:
-          path: |
-            ${{ env.PNPM_CACHE_FOLDER }}
-            node_modules
-          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+          path: ${{ env.PNPM_CACHE_FOLDER }}
+          key: ${{ needs.setup.outputs.cache-key }}
 
       - name: 🔍 Run ${{ matrix.name }}
         run: ${{ matrix.command }}
@@ -136,13 +110,14 @@ jobs:
         with:
           name: test-results
           path: junit.xml
-          retention-days: 7
+          retention-days: 14
 
       - name: 📝 Upload coverage report
         if: matrix.task == 'test' && success()
         uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
+          flags: unit-tests
           fail_ci_if_error: false
 
   # Сборка проекта
@@ -159,25 +134,17 @@ jobs:
         with:
           fetch-depth: 1
 
-      - name: 🔧 Setup Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-
-      # Важно: сначала установить pnpm
-      - name: 📦 Setup PNPM
+      - name: 📦 Setup PNPM (reuse)
         uses: pnpm/action-setup@v3
         with:
           version: ${{ env.PNPM_VERSION }}
           run_install: false
 
-      - name: 💾 Restore dependencies cache
+      - name: 💾 Restore PNPM cache
         uses: actions/cache@v4
         with:
-          path: |
-            ${{ env.PNPM_CACHE_FOLDER }}
-            node_modules
-          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+          path: ${{ env.PNPM_CACHE_FOLDER }}
+          key: ${{ needs.setup.outputs.cache-key }}
 
       - name: 🏗️ Build application
         run: pnpm build
@@ -187,7 +154,7 @@ jobs:
         with:
           name: build-${{ github.sha }}
           path: dist/
-          retention-days: 7
+          retention-days: 14
           if-no-files-found: error
 
   # Сборка Storybook
@@ -204,25 +171,17 @@ jobs:
         with:
           fetch-depth: 1
 
-      - name: 🔧 Setup Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-
-      # Важно: сначала установить pnpm
-      - name: 📦 Setup PNPM
+      - name: 📦 Setup PNPM (reuse)
         uses: pnpm/action-setup@v3
         with:
           version: ${{ env.PNPM_VERSION }}
           run_install: false
 
-      - name: 💾 Restore dependencies cache
+      - name: 💾 Restore PNPM cache
         uses: actions/cache@v4
         with:
-          path: |
-            ${{ env.PNPM_CACHE_FOLDER }}
-            node_modules
-          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+          path: ${{ env.PNPM_CACHE_FOLDER }}
+          key: ${{ needs.setup.outputs.cache-key }}
 
       - name: 🏗️ Build Storybook
         run: pnpm build-storybook
@@ -232,19 +191,20 @@ jobs:
         with:
           name: storybook-${{ github.sha }}
           path: storybook-static/
-          retention-days: 7
+          retention-days: 14
           if-no-files-found: error
 
-  # Деплой на GitHub Pages (для main ветки)
+  # Деплой на GitHub Pages
   deploy-gh-pages:
     name: 🚀 Deploy to GitHub Pages
     needs: [build, storybook]
     runs-on: ubuntu-latest
     timeout-minutes: 10
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
-    # Необходимые разрешения для деплоя на GitHub Pages
     permissions:
       contents: write
+      pages: write
+      id-token: write
 
     steps:
       - name: ⬇️ Checkout repository
